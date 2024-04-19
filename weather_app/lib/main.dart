@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'login_bloc.dart';
+import 'database_controller.dart';
 
-void main() {
+void main() async {
+  //IS IT RIGHT LOCATED?
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = await DatabaseHelper().database;
+
   runApp(const WeatherApp());
 }
 
