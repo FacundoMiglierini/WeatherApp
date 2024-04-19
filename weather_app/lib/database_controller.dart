@@ -25,7 +25,7 @@ class DatabaseHelper {
       join(await getDatabasesPath(), 'users.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE users(id INTEGER PRIMARY KEY, email TEXT, password TEXT)',
+          'CREATE TABLE users(id INTEGER PRIMARY KEY, email TEXT UNIQUE, password TEXT)',
         );
       },
         
@@ -43,6 +43,22 @@ class DatabaseHelper {
       user.toMap(),
       conflictAlgorithm: ConflictAlgorithm.fail,
     );
+  }
+
+  Future<User> user(String email, String password) async {
+
+    final db = await database;
+
+    final List<Map<String, Object?>> userMap = await db.query(
+      'users', 
+      where: 'email = $email and password = $password',
+      limit: 1,
+    );
+    if (userMap.isNotEmpty) {
+      return User.fromMap(userMap.first);
+    } else {
+      throw Exception('Wrong login credentials.');
+    }
   }
   
   //TODO retrieve emails only
@@ -80,6 +96,14 @@ class User {
       'email': email,
       'password': password,
     };
+  }
+
+  factory User.fromMap(Map<String, dynamic> map) {
+    return User(
+      id: map['id'],
+      email: map['email'],
+      password: map['password'],
+    );
   }
 
   @override

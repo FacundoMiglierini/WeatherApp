@@ -16,8 +16,10 @@ dependencies:
   equatable: ^2.0.3
   cupertino_icons: ^1.0.6
   sqflite: ^2.3.3
+  sqflite_common_ffi: any
   path: ^1.9.0
   email_validator: '^2.1.16'
+  crypt: ^4.3.1
 
 dev_dependencies:
   flutter_test:
