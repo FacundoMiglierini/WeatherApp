@@ -27,10 +27,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         }
         
         if (!DatabaseHelper().isValidUser(email, password)) {
-          throw Exception('Wrong credentials');
+          throw Exception('Invalid email or password');
         }
 
-        await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 1));
         emit(LoginSuccess());
       } catch (error) {
         emit(LoginFailure(error: error.toString()));

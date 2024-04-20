@@ -24,7 +24,8 @@ class WeatherApp extends StatelessWidget {
           return MaterialApp(
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
+              colorScheme:
+                  ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
             ),
             home: const LoginPage(),
           );
@@ -34,6 +35,28 @@ class WeatherApp extends StatelessWidget {
   }
 }
 
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(20.0),
+            child: TitleCard(),
+          ),
+          Expanded( 
+            child: Container( 
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: const LoginPage(),
+            )
+          )
+        ],
+    ));
+  }
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -43,7 +66,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -53,46 +75,49 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.dispose();
     super.dispose();
   }
-  
-   @override
+
+  @override
   Widget build(BuildContext context) {
-    final loginBloc = BlocProvider.of < LoginBloc > (context);
+    final loginBloc = BlocProvider.of<LoginBloc>(context);
 
     return Scaffold(
-      body: BlocListener < LoginBloc, LoginState > (
+      body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginFailure) {
-            ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(
-              SnackBar(
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(
                 content: Text(state.error),
                 duration: const Duration(seconds: 3),
-              )
-            );
-          } else if (state is LoginSuccess) {
-            ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(
-              const SnackBar(
+              ));
+          }
+          if (state is LoginSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(const SnackBar(
                 content: Text('Welcome!'),
                 duration: Duration(seconds: 1),
-              )
-            );
+              ));
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const WeatherPage()),
             );
           }
         },
-        child: BlocBuilder < LoginBloc, LoginState > (
+        child: BlocBuilder<LoginBloc, LoginState>(
           builder: (context, state) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: < Widget > [
+                children: <Widget>[
+                  const TitleCard(),
+                  const SizedBox(height: 30),
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                     labelText: 'Email',
-                     border: OutlineInputBorder(),
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -106,14 +131,16 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: state is ! LoginLoading ? () {
-                      loginBloc.add(
-                        LoginButtonPressed(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                        ),
-                      );
-                    } : null,
+                    onPressed: state is! LoginLoading
+                        ? () {
+                            loginBloc.add(
+                              LoginButtonPressed(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              ),
+                            );
+                          }
+                        : null,
                     child: const Text('Login'),
                   ),
                   if (state is LoginLoading)
@@ -125,7 +152,8 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RegisterForm()),
+                        MaterialPageRoute(
+                            builder: (context) => const RegisterForm()),
                       );
                     },
                     child: Text(
@@ -146,7 +174,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
 
@@ -156,9 +183,7 @@ class RegisterForm extends StatefulWidget {
   }
 }
 
-
-class RegisterFormState extends State<RegisterForm>{
-
+class RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -173,96 +198,95 @@ class RegisterFormState extends State<RegisterForm>{
     super.dispose();
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      body: Form( 
-        key: _formKey,
-        child: Column( 
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: < Widget > [
-            TextFormField(
-              controller: _emailController,
-              validator: (value) {
-                if (value == null || value.isEmpty)  {
-                  return 'Please enter a valid email';
-                } else if (!EmailValidator.validate(value)) {
-                  return 'Email address is not valid';
-                }
-                return null;
-              },
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.length < 8) {
-                  return 'Please enter a password that contains at least 8 characters';
-                }
-                return null; 
-              },
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _repeatedPasswordController,
-              obscureText: true,
-              validator: (value) {
-                if (value != _passwordController.text) {
-                  return 'The password you entered is different';
-                }
-                return null;
-              },
-              autovalidateMode: AutovalidateMode.always,
-              decoration: const InputDecoration(
-                labelText: 'Confirm password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  if (DatabaseHelper().insertUser(_emailController.text, _passwordController.text)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('New user registered successfully')),
-                    );
-                    Navigator.pop(context);
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Check errors and try again')),
-                  );
-                }
-              },
-              child: const Text('Submit'),
-            ),
-          ]
-        )
-      )
-    );
+        body: Form(
+            key: _formKey,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextFormField(
+                    controller: _emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a valid email';
+                      } else if (!EmailValidator.validate(value)) {
+                        return 'Email address is not valid';
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.length < 8) {
+                        return 'Please enter a password that contains at least 8 characters';
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _repeatedPasswordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'The password you entered is different';
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.always,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm password',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        if (DatabaseHelper().insertUser(
+                            _emailController.text, _passwordController.text)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('New user registered successfully')),
+                          );
+                          Navigator.pop(context);
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Check errors and try again')),
+                        );
+                      }
+                    },
+                    child: const Text('Submit'),
+                  ),
+                ])));
   }
 }
-  
+
 class WeatherPage extends StatelessWidget {
   const WeatherPage({super.key});
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-
-    return Center( 
-      child: Column( 
+    return Center(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('WEATHER!'),
@@ -273,6 +297,31 @@ class WeatherPage extends StatelessWidget {
             child: Text('Log out'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TitleCard extends StatelessWidget {
+  const TitleCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onBackground,
+    );
+
+    return Card(
+      color: theme.colorScheme.background,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Text(
+          'Weather App!',
+          style: style,
+        ),
       ),
     );
   }
