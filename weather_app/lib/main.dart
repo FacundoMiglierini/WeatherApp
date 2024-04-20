@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'login_bloc.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-void main() async {
+Future main() async {
+  // Initialize FFI
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 

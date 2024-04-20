@@ -9,12 +9,16 @@ part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(LoginInitial());
+  LoginBloc() : super(LoginInitial()){
 
-  Stream<LoginState> mapEventToState(LoginEvent event) async* {
+    on<LoginEvent>(_onLogin);
 
+  }
+
+  //TODO refactor replacing mapEventToState
+  _onLogin(LoginEvent event, Emitter<LoginState> emit) async {
     if (event is LoginButtonPressed) {
-      yield LoginLoading();
+      emit(LoginLoading());
 
       try {
         var email = event.props[0];
@@ -26,11 +30,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         
         DatabaseHelper().user(email, Crypt.sha256(password).toString());
 
-        //await Future.delayed(const Duration(seconds: 2));
-        yield LoginSuccess();
+        await Future.delayed(const Duration(seconds: 2));
+        emit(LoginSuccess());
       } catch (error) {
-        yield LoginFailure(error: error.toString());
+        emit(LoginFailure(error: error.toString()));
       }
     }
-  }
+  } 
 }
