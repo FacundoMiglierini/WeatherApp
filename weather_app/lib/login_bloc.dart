@@ -15,7 +15,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   }
 
-  //TODO refactor replacing mapEventToState
   _onLogin(LoginEvent event, Emitter<LoginState> emit) async {
     if (event is LoginButtonPressed) {
       emit(LoginLoading());
@@ -28,7 +27,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           throw const FormatException('Invalid email format');
         }
         
-        DatabaseHelper().user(email, Crypt.sha256(password).toString());
+        var hashedPassword = Crypt.sha256(password).toString();
+
+        if (!DatabaseHelper().isValidUser(email, hashedPassword)) {
+          throw Exception('Wrong credentials');
+        }
 
         await Future.delayed(const Duration(seconds: 2));
         emit(LoginSuccess());

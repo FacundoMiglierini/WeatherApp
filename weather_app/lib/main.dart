@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'login_bloc.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-Future main() async {
-  // Initialize FFI
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+void main() async {
+  await Hive.initFlutter();
+  await Hive.openBox<String>('user');
 
   runApp(const WeatherApp());
 }
@@ -66,6 +65,17 @@ class _LoginPageState extends State<LoginPage> {
                 content: Text(state.error),
                 duration: const Duration(seconds: 3),
               )
+            );
+          } else if (state is LoginSuccess) {
+            ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(
+              const SnackBar(
+                content: Text('Welcome!'),
+                duration: Duration(seconds: 1),
+              )
+            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const WeatherPage()),
             );
           }
         },
