@@ -288,20 +288,34 @@ class RegisterFormState extends State<RegisterForm> {
 }
 
 
-class WeatherPage extends StatelessWidget {
+class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
+
+  @override 
+  State<WeatherPage> createState() => _WeatherPageState();
+}
+
+
+class _WeatherPageState extends State<WeatherPage>{
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWeather();
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      fetchWeather();
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer?.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    callWeatherApi();
-    /*
-    Timer.periodic(const Duration(minutes: 1), (arg) {
-      fetchWeather();
-    });
-    */
-
-    fetchWeather();
 
     return const Center(
       child: Column(
