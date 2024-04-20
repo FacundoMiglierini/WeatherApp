@@ -101,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                 content: Text('Welcome!'),
                 duration: Duration(seconds: 1),
               ));
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => ChangeNotifierProvider(
@@ -317,11 +317,21 @@ class _WeatherPageState extends State<WeatherPage>{
   @override
   Widget build(BuildContext context) {
 
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           WeatherCard(),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginPage()),
+                );
+            }, 
+            icon: Icon(Icons.logout), 
+            label: Text('Log out')),
         ],
       ),
     );
