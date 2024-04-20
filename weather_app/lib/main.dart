@@ -89,11 +89,11 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: < Widget > [
                   TextFormField(
-                   controller: _emailController,
-                   decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                   ),
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                     labelText: 'Email',
+                     border: OutlineInputBorder(),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
