@@ -1,6 +1,8 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:weather_app/database_controller.dart';
 import 'login_bloc.dart';
 
 void main() async {
@@ -119,6 +121,21 @@ class _LoginPageState extends State<LoginPage> {
                       padding: EdgeInsets.all(8.0),
                       child: CircularProgressIndicator(),
                     ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterForm()),
+                      );
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  )
                 ],
               ),
             );
@@ -129,47 +146,114 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-/*
-class Login extends StatelessWidget {
+
+class RegisterForm extends StatefulWidget {
+  const RegisterForm({super.key});
+
+  @override
+  RegisterFormState createState() {
+    return RegisterFormState();
+  }
+}
+
+
+class RegisterFormState extends State<RegisterForm>{
+
+  final _formKey = GlobalKey<FormState>();
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _repeatedPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _repeatedPasswordController.dispose();
+    super.dispose();
+  }
+
   @override 
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var isLoggedIn = appState.isLoggedIn;
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const TextField(
-            decoration: InputDecoration(
-              labelText: 'Username',
+    return Scaffold(
+      body: Form( 
+        key: _formKey,
+        child: Column( 
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: < Widget > [
+            TextFormField(
+              controller: _emailController,
+              validator: (value) {
+                if (value == null || value.isEmpty)  {
+                  return 'Please enter a valid email';
+                } else if (!EmailValidator.validate(value)) {
+                  return 'Email address is not valid';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: 'Password',
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.length < 8) {
+                  return 'Please enter a password that contains at least 8 characters';
+                }
+                return null; 
+              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              if (appState.logIn(username, password)) {
-                Navigator.push( 
-                  context,
-                  MaterialPageRoute(builder: (context) => const WeatherPage()),
-                );
-              }
-            },
-            child: const Text('Login'),
-          ),
-        ],
-      ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _repeatedPasswordController,
+              obscureText: true,
+              validator: (value) {
+                if (value != _passwordController.text) {
+                  return 'The password you entered is different';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.always,
+              decoration: const InputDecoration(
+                labelText: 'Confirm password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  if (DatabaseHelper().insertUser(_emailController.text, _passwordController.text)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('New user registered successfully')),
+                    );
+                    Navigator.pop(context);
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Check errors and try again')),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ]
+        )
+      )
     );
   }
 }
-*/
   
 class WeatherPage extends StatelessWidget {
   const WeatherPage({super.key});

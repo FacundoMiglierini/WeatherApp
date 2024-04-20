@@ -1,4 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:crypt/crypt.dart';
+
 
 class DatabaseHelper {
 
@@ -13,11 +15,16 @@ class DatabaseHelper {
       return false;
     } 
     
-    return email == storedEmail && password == storedPassword;
+    String hashedPassword = Crypt.sha256(password).toString();
+    
+    return email == storedEmail && hashedPassword == storedPassword;
   } 
   
-  void insertUser(String email, String password) {
+  bool insertUser(String email, String password) {
+    String hashedPassword = Crypt.sha256(password).toString();
     usersBox.put('email', email);
-    usersBox.put('password', password);
+    usersBox.put('password', hashedPassword);
+    
+    return true;
   }
 }

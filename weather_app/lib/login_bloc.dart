@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 
 import 'package:email_validator/email_validator.dart';
 import 'database_controller.dart';
-import 'package:crypt/crypt.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
@@ -27,9 +26,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           throw const FormatException('Invalid email format');
         }
         
-        var hashedPassword = Crypt.sha256(password).toString();
-
-        if (!DatabaseHelper().isValidUser(email, hashedPassword)) {
+        if (!DatabaseHelper().isValidUser(email, password)) {
           throw Exception('Wrong credentials');
         }
 
