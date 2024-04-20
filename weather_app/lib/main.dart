@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:weather_app/database_controller.dart';
 import 'login_bloc.dart';
+import 'dart:async';
+import 'weather_api_controller.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -100,7 +103,11 @@ class _LoginPageState extends State<LoginPage> {
               ));
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const WeatherPage()),
+              MaterialPageRoute(
+                builder: (context) => ChangeNotifierProvider(
+                  create: (context) => WeatherState(),
+                  child: const WeatherPage()),
+                )
             );
           }
         },
@@ -280,22 +287,27 @@ class RegisterFormState extends State<RegisterForm> {
   }
 }
 
+
 class WeatherPage extends StatelessWidget {
   const WeatherPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+
+    callWeatherApi();
+    /*
+    Timer.periodic(const Duration(minutes: 1), (arg) {
+      fetchWeather();
+    });
+    */
+
+    fetchWeather();
+
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('WEATHER!'),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('Log out'),
-          ),
+          WeatherCard(),
         ],
       ),
     );
@@ -306,6 +318,7 @@ class TitleCard extends StatelessWidget {
   const TitleCard({
     super.key,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -320,6 +333,36 @@ class TitleCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Text(
           'Weather App!',
+          style: style,
+        ),
+      ),
+    );
+  }
+}
+
+
+class WeatherCard extends StatelessWidget {
+  const WeatherCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    var appState = context.watch<WeatherState>();
+    var temp = appState.temp;
+
+    final theme = Theme.of(context);
+    final style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onPrimaryContainer,
+    );
+
+    return Card(
+      color: theme.colorScheme.background,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Text(
+          '$temp grados',
           style: style,
         ),
       ),
