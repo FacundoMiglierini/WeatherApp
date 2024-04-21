@@ -1,12 +1,11 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:weather_app/database_controller.dart';
-import 'login_bloc.dart';
 import 'dart:async';
 import 'weather_api_controller.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer;
 
 void main() async {
   await Hive.initFlutter();
@@ -20,22 +19,47 @@ class WeatherApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginBloc(),
-      child: BlocBuilder<LoginBloc, LoginState>(
-        builder: (context, state) {
-          return MaterialApp(
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme:
-                  ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
-            ),
-            home: const HomePage(),
-          );
-        },
+    return ChangeNotifierProvider(
+      create: (context) => AppState(),
+      child: MaterialApp(
+        title: 'Weather App',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme:
+              ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
+        ),
+        home: HomePage(),
       ),
     );
   }
+}
+
+
+class AppState extends ChangeNotifier {
+  var isLoggedIn = false;
+  var temp = 0;
+
+  bool logIn(String email, String password){
+
+    try {
+      if (!EmailValidator.validate(email)) {
+        throw const FormatException('Invalid email format');
+      }
+      
+      if (!DatabaseHelper().isValidUser(email, password)) {
+        throw Exception('Invalid email or password');
+      }
+
+      isLoggedIn = true;
+
+      notifyListeners();
+      return true;
+    } catch (error) {
+      //emit(LoginFailure(error: error.toString()));
+      return false;
+    }
+  }
+
 }
 
 
@@ -47,22 +71,134 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  var selectedIndex = 0;
+
+  void toggleIndex() {
+    setState(() {
+      selectedIndex = 1 - selectedIndex;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final loginBloc = BlocProvider.of<LoginBloc>(context);
+    
+    var appState = context.watch<AppState>();
+    var isLoggedIn = appState.isLoggedIn;
     
     Widget page;
+    
+    if (!isLoggedIn) {
+      switch (selectedIndex) {
+        case 0:
+          page = LoginPage(toggleIndex: toggleIndex);
+        case 1:
+          page = RegisterPage(toggleIndex: toggleIndex);
+        default:
+          throw UnimplementedError('no widget for $selectedIndex');
+      }
+    } else {
+      page = WeatherPage();
+    }
 
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        body: Row(
+          children: [
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: page,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+
+class LoginPage extends StatelessWidget {
+  LoginPage({Key? key, required this.toggleIndex}) : super(key: key);
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  final VoidCallback toggleIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<AppState>();
+    
+    return Center( 
+      child: Column( 
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TitleCard(),
+          SizedBox(height: 10),
+          const SizedBox(height: 30),
+          TextFormField(
+            controller: _emailController,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Password',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  if(!appState.logIn(_emailController.text, _passwordController.text)) {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(const SnackBar(
+                        content: Text("Invalid credentials."),
+                        duration: Duration(seconds: 3),
+                      ));
+                  } else {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(const SnackBar(
+                        content: Text("Welcome!"),
+                        duration: Duration(seconds: 3),
+                      ));
+                  }
+                },
+                child: const Text('Login'),
+              ),
+              SizedBox(width: 10),
+              Text('Don\'t you have an account? '),
+              InkWell(
+                onTap: toggleIndex,
+                child: Text(
+                  'Sign Up',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ]
+      )
+    );
+  }
+}
+    
+    /*
     return Scaffold(
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
@@ -169,35 +305,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+*/
 
-class RegisterForm extends StatefulWidget {
-  const RegisterForm({super.key});
 
-  @override
-  RegisterFormState createState() {
-    return RegisterFormState();
-  }
-}
+class RegisterPage extends StatelessWidget {
+  RegisterPage({Key? key, required this.toggleIndex}) : super(key: key);
 
-class RegisterFormState extends State<RegisterForm> {
+  final VoidCallback toggleIndex;
+
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _repeatedPasswordController = TextEditingController();
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _repeatedPasswordController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Form(
+
+    return Center(
+      child: Column( 
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Form(
             key: _formKey,
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -261,7 +391,7 @@ class RegisterFormState extends State<RegisterForm> {
                                 content:
                                     Text('New user registered successfully')),
                           );
-                          Navigator.pop(context);
+                          toggleIndex();
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -272,7 +402,23 @@ class RegisterFormState extends State<RegisterForm> {
                     },
                     child: const Text('Submit'),
                   ),
-                ])));
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Already have an account? '),
+                      InkWell(
+                        onTap: toggleIndex,
+                        child: Text(
+                          'Log in',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                ]))]));
   }
 }
 
