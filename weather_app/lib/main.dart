@@ -40,7 +40,7 @@ class WeatherApp extends StatelessWidget {
 class AppState extends ChangeNotifier {
   var isLoggedIn = false;
 
-  bool logIn(String email, String password) {
+  String logIn(String email, String password) {
 
     try {
       if (!EmailValidator.validate(email)) {
@@ -54,10 +54,10 @@ class AppState extends ChangeNotifier {
       isLoggedIn = true;
 
       notifyListeners();
-      return true;
+      return "Welcome!";
     } catch (error) {
-      //emit(LoginFailure(error: error.toString()));
-      return false;
+      notifyListeners();
+      return error.toString();
     }
   }
   
@@ -65,7 +65,7 @@ class AppState extends ChangeNotifier {
     isLoggedIn = false;
     notifyListeners();
   }
-
+  
 }
 
 
@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
       selectedIndex = 0;
       page = WeatherPage();
     }
-
+    
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         body: Row(
@@ -167,21 +167,13 @@ class LoginPage extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if(!appState.logIn(_emailController.text, _passwordController.text)) {
-                    ScaffoldMessenger.of(context)
-                      ..hideCurrentSnackBar()
-                      ..showSnackBar(const SnackBar(
-                        content: Text("Invalid credentials."),
-                        duration: Duration(seconds: 3),
-                      ));
-                  } else {
-                    ScaffoldMessenger.of(context)
-                      ..hideCurrentSnackBar()
-                      ..showSnackBar(const SnackBar(
-                        content: Text("Welcome!"),
-                        duration: Duration(seconds: 3),
-                      ));
-                  }
+                  String message = appState.logIn(_emailController.text, _passwordController.text);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(SnackBar(
+                      content: Text(message),
+                      duration: Duration(seconds: 3),
+                    ));
                 },
                 child: const Text('Login'),
               ),
@@ -429,7 +421,7 @@ class WeatherCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(
-          '$temp grados',
+          '$temp',
           style: style,
         ),
       ),
