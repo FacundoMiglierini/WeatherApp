@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:weather_app/database_controller.dart';
 import 'dart:async';
-import 'weather_api_controller.dart';
 import 'package:provider/provider.dart';
 import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
@@ -28,7 +27,7 @@ class WeatherApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme:
-              ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
+              ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
         home: HomePage(),
       ),
@@ -114,7 +113,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             Expanded(
               child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
+                color: Theme.of(context).colorScheme.background,
                 child: page,
               ),
             ),
@@ -137,61 +136,86 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<AppState>();
+
+    double deviceHeight(BuildContext context) => MediaQuery.of(context).size.height;
+    double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
     
     return Center( 
-      child: Column( 
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TitleCard(),
-          SizedBox(height: 10),
-          const SizedBox(height: 30),
-          TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  String message = appState.logIn(_emailController.text, _passwordController.text);
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(SnackBar(
-                      content: Text(message),
-                      duration: Duration(seconds: 3),
-                    ));
-                },
-                child: const Text('Login'),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: deviceWidth(context) * 0.08,
+          right: deviceWidth(context) * 0.08,
+        ),
+        child: Column( 
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TitleCard(),
+            SizedBox(height: 10),
+            const SizedBox(height: 30),
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
               ),
-              SizedBox(width: 10),
-              Text('Don\'t you have an account? '),
-              InkWell(
-                onTap: toggleIndex,
-                child: Text(
-                  'Sign Up',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                  ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                String message = appState.logIn(_emailController.text, _passwordController.text);
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(
+                    content: Text(message),
+                    duration: Duration(seconds: 3),
+                  ));
+              },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
                 ),
-              )
-            ],
-          ),
-        ]
+                minimumSize: Size(
+                  // Set the width of the button to be the same as the text field
+                  MediaQuery.of(context).size.width,
+                  // Set the height of the button
+                  50,
+                ),
+                textStyle: TextStyle(fontSize: 20),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              child: Text('Log in'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(width: 10),
+                Text('Don\'t you have an account? ', style: TextStyle(fontSize: 15)),
+                InkWell(
+                  onTap: toggleIndex,
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                      fontSize: 15,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ]
+        ),
       )
     );
   }
@@ -324,6 +348,8 @@ class WeatherPage extends StatefulWidget {
 class _WeatherPageState extends State<WeatherPage>{
   Timer? _timer;
   var _temp = 0.0;
+  double lat = -34.9206722;
+  double long = -57.9561499;
 
   @override
   void initState() {
@@ -379,15 +405,19 @@ class TitleCard extends StatelessWidget {
   });
 
 
+  double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.displayMedium!.copyWith(
+    final style = deviceWidth(context) > 380 ? theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onBackground,
+    ) : theme.textTheme.displaySmall!.copyWith(
       color: theme.colorScheme.onBackground,
     );
 
     return Card(
-      color: theme.colorScheme.background,
+      color: theme.colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(
