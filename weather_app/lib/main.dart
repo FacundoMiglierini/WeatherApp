@@ -30,7 +30,7 @@ class WeatherApp extends StatelessWidget {
               colorScheme:
                   ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
             ),
-            home: const LoginPage(),
+            home: const HomePage(),
           );
         },
       ),
@@ -38,37 +38,15 @@ class WeatherApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(20.0),
-            child: TitleCard(),
-          ),
-          Expanded( 
-            child: Container( 
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: const LoginPage(),
-            )
-          )
-        ],
-    ));
-  }
+  State<HomePage> createState() => _HomePageState();
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
+class _HomePageState extends State<HomePage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -82,6 +60,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final loginBloc = BlocProvider.of<LoginBloc>(context);
+    
+    Widget page;
 
     return Scaffold(
       body: BlocListener<LoginBloc, LoginState>(
@@ -111,70 +91,79 @@ class _LoginPageState extends State<LoginPage> {
             );
           }
         },
-        child: BlocBuilder<LoginBloc, LoginState>(
-          builder: (context, state) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const TitleCard(),
-                  const SizedBox(height: 30),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: state is! LoginLoading
-                        ? () {
-                            loginBloc.add(
-                              LoginButtonPressed(
-                                email: _emailController.text,
-                                password: _passwordController.text,
-                              ),
-                            );
-                          }
-                        : null,
-                    child: const Text('Login'),
-                  ),
-                  if (state is LoginLoading)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const RegisterForm()),
-                      );
-                    },
-                    child: Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        decoration: TextDecoration.underline,
+        child: Row(
+          children: [
+            BlocBuilder<LoginBloc, LoginState>(
+              builder: (context, state) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const SizedBox(height: 30),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    ),
-                  )
-                ],
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: state is! LoginLoading
+                            ? () {
+                                loginBloc.add(
+                                  LoginButtonPressed(
+                                    email: _emailController.text,
+                                    password: _passwordController.text,
+                                  ),
+                                );
+                              }
+                            : null,
+                        child: const Text('Login'),
+                      ),
+                      if (state is LoginLoading)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const RegisterForm()),
+                          );
+                        },
+                        child: Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            ),
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: page,
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -327,7 +316,7 @@ class _WeatherPageState extends State<WeatherPage>{
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const LoginPage()),
+                  builder: (context) => const HomePage()),
                 );
             }, 
             icon: Icon(Icons.logout), 
