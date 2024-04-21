@@ -6,6 +6,8 @@ import 'dart:async';
 import 'weather_api_controller.dart';
 import 'package:provider/provider.dart';
 import 'dart:developer' as developer;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() async {
   await Hive.initFlutter();
@@ -37,9 +39,8 @@ class WeatherApp extends StatelessWidget {
 
 class AppState extends ChangeNotifier {
   var isLoggedIn = false;
-  var temp = 0;
 
-  bool logIn(String email, String password){
+  bool logIn(String email, String password) {
 
     try {
       if (!EmailValidator.validate(email)) {
@@ -58,6 +59,11 @@ class AppState extends ChangeNotifier {
       //emit(LoginFailure(error: error.toString()));
       return false;
     }
+  }
+  
+  void logOut() {
+    isLoggedIn = false;
+    notifyListeners();
   }
 
 }
@@ -98,6 +104,7 @@ class _HomePageState extends State<HomePage> {
           throw UnimplementedError('no widget for $selectedIndex');
       }
     } else {
+      selectedIndex = 0;
       page = WeatherPage();
     }
 
@@ -198,115 +205,6 @@ class LoginPage extends StatelessWidget {
   }
 }
     
-    /*
-    return Scaffold(
-      body: BlocListener<LoginBloc, LoginState>(
-        listener: (context, state) {
-          if (state is LoginFailure) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                content: Text(state.error),
-                duration: const Duration(seconds: 3),
-              ));
-          }
-          if (state is LoginSuccess) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(const SnackBar(
-                content: Text('Welcome!'),
-                duration: Duration(seconds: 1),
-              ));
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChangeNotifierProvider(
-                  create: (context) => WeatherState(),
-                  child: const WeatherPage()),
-                )
-            );
-          }
-        },
-        child: Row(
-          children: [
-            BlocBuilder<LoginBloc, LoginState>(
-              builder: (context, state) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const SizedBox(height: 30),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: state is! LoginLoading
-                            ? () {
-                                loginBloc.add(
-                                  LoginButtonPressed(
-                                    email: _emailController.text,
-                                    password: _passwordController.text,
-                                  ),
-                                );
-                              }
-                            : null,
-                        child: const Text('Login'),
-                      ),
-                      if (state is LoginLoading)
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const RegisterForm()),
-                          );
-                        },
-                        child: Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              },
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
-
 
 class RegisterPage extends StatelessWidget {
   RegisterPage({Key? key, required this.toggleIndex}) : super(key: key);
@@ -433,6 +331,7 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage>{
   Timer? _timer;
+  var _temp = 0.0;
 
   @override
   void initState() {
@@ -449,21 +348,30 @@ class _WeatherPageState extends State<WeatherPage>{
     _timer?.cancel();
   }
 
+  Future<void> fetchWeather() async {
+      final response = await http.get(Uri.parse('https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$long&current=temperature_2m&timezone=auto&forecast_days=1'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          var json = jsonDecode(response.body) as Map<String, dynamic>;
+          _temp = json['current']['temperature_2m'];
+        });
+      }
+    }
+
   @override
   Widget build(BuildContext context) {
+
+    var appState = context.watch<AppState>();
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          WeatherCard(),
+          WeatherCard(temp: _temp),
           ElevatedButton.icon(
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HomePage()),
-                );
+              appState.logOut();              
             }, 
             icon: Icon(Icons.logout), 
             label: Text('Log out')),
@@ -501,15 +409,15 @@ class TitleCard extends StatelessWidget {
 
 
 class WeatherCard extends StatelessWidget {
-  const WeatherCard({
+  WeatherCard({
     super.key,
+    required this.temp,
   });
+  
+  var temp = 0.0;
 
   @override
   Widget build(BuildContext context) {
-
-    var appState = context.watch<WeatherState>();
-    var temp = appState.temp;
 
     final theme = Theme.of(context);
     final style = theme.textTheme.displayMedium!.copyWith(
