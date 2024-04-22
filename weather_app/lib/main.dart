@@ -9,12 +9,12 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:weather_app/weather_controller.dart';
 
-//TODO check for empty credentials on login
+//TODO relocate logout button
+//TODO fix closing the app with back button (pass login to false)
 //TODO fix weather layout on big screens
 //TODO change photo according to weather
-//TODO relocate logout button
-//TODO optional: add loading animations
 //TODO refactor code structure
+//TODO optional: add loading animations
 
 
 void main() async {
@@ -51,6 +51,10 @@ class AppState extends ChangeNotifier {
   String logIn(String email, String password) {
 
     try {
+      if (email.isEmpty || password.isEmpty) {
+        throw Exception('Please enter email and password');
+      }
+
       if (!EmailValidator.validate(email)) {
         throw const FormatException('Invalid email format');
       }
@@ -102,18 +106,25 @@ class _HomePageState extends State<HomePage> {
     
     Widget page;
     
-    if (!isLoggedIn) {
-      switch (selectedIndex) {
-        case 0:
-          page = LoginPage(toggleIndex: toggleIndex);
-        case 1:
-          page = RegisterPage(toggleIndex: toggleIndex);
-        default:
-          throw UnimplementedError('no widget for $selectedIndex');
-      }
-    } else {
-      selectedIndex = 0;
-      page = const WeatherPage();
+    if (isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+
+        Navigator.pushReplacement<void, void>(
+          context,
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const WeatherPage(),
+          ),
+        );
+      });
+    }
+    
+    switch (selectedIndex) {
+      case 0:
+        page = LoginPage(toggleIndex: toggleIndex);
+      case 1:
+        page = RegisterPage(toggleIndex: toggleIndex);
+      default:
+        throw UnimplementedError('No widget for $selectedIndex');
     }
     
     return LayoutBuilder(builder: (context, constraints) {
@@ -521,33 +532,87 @@ class _WeatherPageState extends State<WeatherPage>{
 
     double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
 
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
-          vertical: deviceWidth(context) * 0.08,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Text( 
-                'City: ${WeatherStats().getCity()}',
-                style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.normal, 
-                ) 
+    return Scaffold( 
+      appBar: AppBar(
+        title: const Text('Weather App!'),
+        centerTitle: true,
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text('Email'),
               ),
-            ),
-            const WeatherCard(),
-            ElevatedButton.icon(
-              onPressed: () {
-                appState.logOut();              
-              }, 
-              icon: const Icon(Icons.logout), 
-              label: const Text('Log out')),
-          ],
+              ListTile(
+                leading: const Icon(Icons.logout_outlined),
+                title: const Text('Log out'),
+                onTap: () {
+                  showAlertDialog(BuildContext context) {  
+                    Widget cancelButton = TextButton(
+                      child: Text("No"),
+                      onPressed:  () {
+                        Navigator.pop(context);
+                      },
+                    );
+                    Widget continueButton = TextButton(
+                      child: Text("Yes"),
+                      onPressed:  () {
+                        appState.logOut();              
+                        Navigator.pushReplacement<void, void>(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) => const HomePage(),
+                          ),
+                        );
+                      },
+                    );  
+                    AlertDialog alert = AlertDialog(
+                      title: Text('Log out'),
+                      content: Text('Are you sure to log out?'),
+                      actions: [
+                        cancelButton,
+                        continueButton,
+                      ],
+                    ); 
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return alert;
+                      },
+                    );
+                  }
+                  showAlertDialog(context);
+                },
+              ),
+            ],
+        )
+      ),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
+            vertical: deviceWidth(context) * 0.08,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 30),
+                child: Text( 
+                  'City: ${WeatherStats().getCity()}',
+                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.normal, 
+                  ) 
+                ),
+              ),
+              const WeatherCard(),
+            ],
+          ),
         ),
       ),
     );
