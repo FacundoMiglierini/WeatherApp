@@ -543,9 +543,22 @@ class _WeatherPageState extends State<WeatherPage>{
             children: [
               DrawerHeader(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                 ),
-                child: Text('Email'),
+                child: Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded( 
+                          child: Image.asset('assets/weather_logo.png', fit: BoxFit.cover,),
+                        ),
+                        Text('Menu'),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.logout_outlined),
@@ -555,6 +568,7 @@ class _WeatherPageState extends State<WeatherPage>{
                     Widget cancelButton = TextButton(
                       child: Text("No"),
                       onPressed:  () {
+                        Navigator.pop(context);
                         Navigator.pop(context);
                       },
                     );
