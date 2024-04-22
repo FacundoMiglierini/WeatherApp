@@ -310,106 +310,160 @@ class RegisterPage extends StatelessWidget {
   final _passwordController = TextEditingController();
   final _repeatedPasswordController = TextEditingController();
 
+  double deviceHeight(BuildContext context) => MediaQuery.of(context).size.height;
+  double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
 
   @override
   Widget build(BuildContext context) {
 
-    return Center(
-      child: Column( 
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Form(
-            key: _formKey,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextFormField(
-                    controller: _emailController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a valid email';
-                      } else if (!EmailValidator.validate(value)) {
-                        return 'Email address is not valid';
-                      }
-                      return null;
-                    },
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
+            vertical: deviceWidth(context) * 0.08,
+          ),
+          child: Center(
+            child: Column( 
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TitleCard(),
+                RegisterForm(formKey: _formKey, emailController: _emailController, passwordController: _passwordController, repeatedPasswordController: _repeatedPasswordController, toggleIndex: toggleIndex)])),
+        );
+      }
+    );
+  }
+}
+
+class RegisterForm extends StatelessWidget {
+  const RegisterForm({
+    super.key,
+    required GlobalKey<FormState> formKey,
+    required TextEditingController emailController,
+    required TextEditingController passwordController,
+    required TextEditingController repeatedPasswordController,
+    required this.toggleIndex,
+  }) : _formKey = formKey, _emailController = emailController, _passwordController = passwordController, _repeatedPasswordController = repeatedPasswordController;
+
+  final GlobalKey<FormState> _formKey;
+  final TextEditingController _emailController;
+  final TextEditingController _passwordController;
+  final TextEditingController _repeatedPasswordController;
+  final VoidCallback toggleIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextFormField(
+              controller: _emailController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a valid email';
+                } else if (!EmailValidator.validate(value)) {
+                  return 'Email address is not valid';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.all(10),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.length < 8) {
+                  return 'Please enter a password that contains at least 8 characters';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.all(10),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _repeatedPasswordController,
+              obscureText: true,
+              validator: (value) {
+                if (value != _passwordController.text) {
+                  return 'The password you entered is different';
+                }
+                return null;
+              },
+              autovalidateMode: AutovalidateMode.always,
+              decoration: const InputDecoration(
+                labelText: 'Confirm password',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.all(10),
+              ),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  if (DatabaseHelper().insertUser(
+                      _emailController.text, _passwordController.text)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text('New user registered successfully')),
+                    );
+                    toggleIndex();
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Check errors and try again')),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                minimumSize: Size(
+                  MediaQuery.of(context).size.width,
+                  40,
+                ),
+                textStyle: const TextStyle(fontSize: 15),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              child: const Text('Sign Up'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(width: 10),
+                const Text('Already have an account? ', style: TextStyle(fontSize: 15)),
+                InkWell(
+                  onTap: toggleIndex,
+                  child: Text(
+                    'Log in',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                      fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.length < 8) {
-                        return 'Please enter a password that contains at least 8 characters';
-                      }
-                      return null;
-                    },
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _repeatedPasswordController,
-                    obscureText: true,
-                    validator: (value) {
-                      if (value != _passwordController.text) {
-                        return 'The password you entered is different';
-                      }
-                      return null;
-                    },
-                    autovalidateMode: AutovalidateMode.always,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm password',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (DatabaseHelper().insertUser(
-                            _emailController.text, _passwordController.text)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('New user registered successfully')),
-                          );
-                          toggleIndex();
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Check errors and try again')),
-                        );
-                      }
-                    },
-                    child: const Text('Submit'),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Already have an account? '),
-                      InkWell(
-                        onTap: toggleIndex,
-                        child: Text(
-                          'Log in',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      )
-                    ],
-                  )
-                ]))]));
+                )
+              ],
+            ),
+          ]));
   }
 }
 
