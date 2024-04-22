@@ -6,6 +6,8 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:developer' as developer;
+import 'package:weather_app/weather_controller.dart';
 
 //TODO check for empty credentials on login
 
@@ -478,9 +480,6 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage>{
   Timer? _timer;
-  var _temp = 0.0;
-  double lat = -34.9206722;
-  double long = -57.9561499;
 
   @override
   void initState() {
@@ -498,12 +497,13 @@ class _WeatherPageState extends State<WeatherPage>{
   }
 
   Future<void> fetchWeather() async {
-      final response = await http.get(Uri.parse('https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$long&current=temperature_2m&timezone=auto&forecast_days=1'));
+      final response = await http.get(Uri.parse('https://api.open-meteo.com/v1/forecast?latitude=${WeatherStats().getLat()}&longitude=${WeatherStats().getLong()}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code&timezone=auto&forecast_days=1'));
+      
+      developer.log('new fetch');
 
       if (response.statusCode == 200) {
         setState(() {
-          var json = jsonDecode(response.body) as Map<String, dynamic>;
-          _temp = json['current']['temperature_2m'];
+          WeatherStats().loadFromJson(jsonDecode(response.body) as Map<String, dynamic>);
         });
       }
     }
@@ -517,7 +517,7 @@ class _WeatherPageState extends State<WeatherPage>{
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          WeatherCard(temp: _temp),
+          WeatherCard(),
           ElevatedButton.icon(
             onPressed: () {
               appState.logOut();              
@@ -571,11 +571,8 @@ class TitleCard extends StatelessWidget {
 class WeatherCard extends StatelessWidget {
   WeatherCard({
     super.key,
-    required this.temp,
   });
   
-  var temp = 0.0;
-
   @override
   Widget build(BuildContext context) {
 
@@ -585,11 +582,11 @@ class WeatherCard extends StatelessWidget {
     );
 
     return Card(
-      color: theme.colorScheme.background,
+      color: theme.colorScheme.onBackground,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(
-          '$temp',
+          WeatherStats().getTemp(),
           style: style,
         ),
       ),
