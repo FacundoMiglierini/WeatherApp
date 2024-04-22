@@ -10,6 +10,12 @@ import 'dart:developer' as developer;
 import 'package:weather_app/weather_controller.dart';
 
 //TODO check for empty credentials on login
+//TODO fix weather layout on big screens
+//TODO change photo according to weather
+//TODO relocate logout button
+//TODO optional: add loading animations
+//TODO refactor code structure
+
 
 void main() async {
   await Hive.initFlutter();
@@ -199,7 +205,7 @@ class LoginPage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        TitleCard(),
+                        const TitleCard(),
                         LoginForm(emailController: _emailController, passwordController: _passwordController, appState: appState, toggleIndex: toggleIndex),
                       ],
                     ),
@@ -330,7 +336,7 @@ class RegisterPage extends StatelessWidget {
             child: Column( 
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                TitleCard(),
+                const TitleCard(),
                 RegisterForm(formKey: _formKey, emailController: _emailController, passwordController: _passwordController, repeatedPasswordController: _repeatedPasswordController, toggleIndex: toggleIndex)])),
         );
       }
@@ -513,18 +519,36 @@ class _WeatherPageState extends State<WeatherPage>{
 
     var appState = context.watch<AppState>();
 
+    double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          WeatherCard(),
-          ElevatedButton.icon(
-            onPressed: () {
-              appState.logOut();              
-            }, 
-            icon: const Icon(Icons.logout), 
-            label: const Text('Log out')),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
+          vertical: deviceWidth(context) * 0.08,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Text( 
+                'City: ${WeatherStats().getCity()}',
+                style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.normal, 
+                ) 
+              ),
+            ),
+            const WeatherCard(),
+            ElevatedButton.icon(
+              onPressed: () {
+                appState.logOut();              
+              }, 
+              icon: const Icon(Icons.logout), 
+              label: const Text('Log out')),
+          ],
+        ),
       ),
     );
   }
@@ -569,7 +593,7 @@ class TitleCard extends StatelessWidget {
 
 
 class WeatherCard extends StatelessWidget {
-  WeatherCard({
+  const WeatherCard({
     super.key,
   });
   
@@ -581,15 +605,88 @@ class WeatherCard extends StatelessWidget {
       color: theme.colorScheme.onPrimaryContainer,
     );
 
-    return Card(
-      color: theme.colorScheme.onBackground,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          WeatherStats().getTemp(),
-          style: style,
+    return Column(
+      children: [
+        Card(
+          color: theme.colorScheme.primaryContainer,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Image.asset(
+                    'assets/clear_sky.png',
+                    fit: BoxFit.scaleDown,
+                  ),  
+                ),
+                const SizedBox(width: 20),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      WeatherStats().getTemp(),
+                      style: style,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      WeatherStats().getWeather(),
+                      style: const TextStyle(fontSize: 16),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+        const SizedBox(height: 20),
+        Card( 
+          color: theme.colorScheme.secondaryContainer,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Apparent temperature',
+                    ),
+                    Text(
+                      WeatherStats().getApparentTemp()
+                    )
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Relative humidity',
+                    ),
+                    Text(
+                      WeatherStats().getHumidity()
+                    )
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Day / Night',
+                    ),
+                    Text(
+                      WeatherStats().isDay() ? 'Day' : 'Night'
+                    )
+                  ],
+                ),
+              ],
+            ),
+          )
+        )
+      ],
     );
   }
 }
