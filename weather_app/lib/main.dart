@@ -11,7 +11,6 @@ import 'package:weather_app/weather_controller.dart';
 
 //TODO refactor code structure
 //TODO fix closing the app with back button (pass login to false)
-//TODO optional: add loading animations
 
 
 void main() async {
@@ -681,14 +680,15 @@ class WeatherCard extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final theme = Theme.of(context);
+    final colorText = WeatherStats().isDay() ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.surface;
     final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimaryContainer,
+      color: colorText,
     );
 
     return Column(
       children: [
         Card(
-          color: theme.colorScheme.primaryContainer,
+          color: WeatherStats().isDay() ? theme.colorScheme.primaryContainer : theme.colorScheme.onSurfaceVariant,
           child: Container(
             constraints: deviceWidth(context) > 400 ? BoxConstraints.tightFor(width: double.infinity, height: 200) : null,
             child: Padding(
@@ -713,7 +713,10 @@ class WeatherCard extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         WeatherStats().getWeather(),
-                        style: const TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 16, 
+                          color: colorText,
+                        ),
                       )
                     ],
                   ),
@@ -724,7 +727,7 @@ class WeatherCard extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Card( 
-          color: theme.colorScheme.secondaryContainer,
+          color: WeatherStats().isDay() ? theme.colorScheme.secondaryContainer : theme.colorScheme.onSurface,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -733,11 +736,19 @@ class WeatherCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Apparent temperature',
+                        style: TextStyle(
+                          fontSize: 16, 
+                          color: colorText,
+                        ),
                     ),
                     Text(
-                      WeatherStats().getApparentTemp()
+                      WeatherStats().getApparentTemp(),
+                      style: TextStyle(
+                        fontSize: 16, 
+                        color: colorText,
+                      ),
                     )
                   ],
                 ),
@@ -745,11 +756,19 @@ class WeatherCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Relative humidity',
+                      style: TextStyle(
+                        fontSize: 16, 
+                        color: colorText,
+                      ),
                     ),
                     Text(
-                      WeatherStats().getHumidity()
+                      WeatherStats().getHumidity(),
+                      style: TextStyle(
+                        fontSize: 16, 
+                        color: colorText,
+                      ),
                     )
                   ],
                 ),
@@ -757,11 +776,19 @@ class WeatherCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Day / Night',
+                      style: TextStyle(
+                        fontSize: 16, 
+                        color: colorText,
+                      ),
                     ),
                     Text(
-                      WeatherStats().isDay() ? 'Day' : 'Night'
+                      WeatherStats().isDay() ? 'Day' : 'Night',
+                      style: TextStyle(
+                        fontSize: 16, 
+                        color: colorText,
+                      ),
                     )
                   ],
                 ),
