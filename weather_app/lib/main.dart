@@ -150,7 +150,6 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<AppState>();
 
-    double deviceHeight(BuildContext context) => MediaQuery.of(context).size.height;
     double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
     
     return LayoutBuilder(
@@ -534,8 +533,9 @@ class _WeatherPageState extends State<WeatherPage>{
       ),
       endDrawer: Drawer(
         child: ListView(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10),
             children: [
+            /*
               DrawerHeader(
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.secondaryContainer,
@@ -555,6 +555,7 @@ class _WeatherPageState extends State<WeatherPage>{
                   ),
                 ),
               ),
+              */
               ListTile(
                 leading: const Icon(Icons.logout_outlined),
                 title: const Text('Log out'),
