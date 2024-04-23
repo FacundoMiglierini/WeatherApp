@@ -219,30 +219,33 @@ class _WeatherPageState extends State<WeatherPage>{
             ],
         )
       ),
-      body: Center(
-        child: loaded ? Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
-            vertical: deviceWidth(context) * 0.08,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 30),
-                child: Text( 
-                  'City: ${WeatherStats().getCity()}',
-                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.normal, 
-                  ) 
+      body: SingleChildScrollView( 
+        child: Center(
+          child: loaded ? Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
+              vertical: deviceWidth(context) * 0.08,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 30),
+                  child: Text( 
+                    'City: ${WeatherStats().getCity()}',
+                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.normal, 
+                    ) 
+                  ),
                 ),
-              ),
-              const WeatherCard(),
-            ],
-          ),
-        ) : const CircularProgressIndicator(),
+                const WeatherCard(),
+              ],
+            ),
+          ) : const CircularProgressIndicator(),
+        )
       )
+      
     );
   }
 

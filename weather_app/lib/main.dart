@@ -75,21 +75,20 @@ class _HomePageState extends State<HomePage> {
       default:
         throw UnimplementedError('No widget for $selectedIndex');
     }
-    
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.background,
-                child: page,
-              ),
+
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.background,
+              child: page,
             ),
-          ],
-        ),
-      );
-    });
+          ),
+        ],
+      ),
+    );
   }
   
   void toggleIndex() {
