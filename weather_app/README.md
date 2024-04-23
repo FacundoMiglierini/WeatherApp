@@ -1,16 +1,3 @@
 # weather_app
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The 'Weather App!' application is designed in Flutter. For the sake of simplicity, it allows registering a single user with email and password through the non-relational database known as Hive. If you want to register a new user, the data of the previous one will be overwritten. Upon logging in, it allows you to view the weather in La Plata City, Argentina. This was achieved by using the Open-Meteo API (https://open-meteo.com/).
