@@ -9,11 +9,10 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:weather_app/weather_controller.dart';
 
-//TODO relocate logout button
-//TODO fix closing the app with back button (pass login to false)
 //TODO fix weather layout on big screens
 //TODO change photo according to weather
 //TODO refactor code structure
+//TODO fix closing the app with back button (pass login to false)
 //TODO optional: add loading animations
 
 
@@ -675,6 +674,8 @@ class WeatherCard extends StatelessWidget {
   const WeatherCard({
     super.key,
   });
+
+  double deviceWidth(BuildContext context) => MediaQuery.of(context).size.width;
   
   @override
   Widget build(BuildContext context) {
@@ -688,33 +689,36 @@ class WeatherCard extends StatelessWidget {
       children: [
         Card(
           color: theme.colorScheme.primaryContainer,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Image.asset(
-                    'assets/clear_sky.png',
-                    fit: BoxFit.scaleDown,
-                  ),  
-                ),
-                const SizedBox(width: 20),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      WeatherStats().getTemp(),
-                      style: style,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      WeatherStats().getWeather(),
-                      style: const TextStyle(fontSize: 16),
+          child: Container(
+            constraints: deviceWidth(context) > 400 ? BoxConstraints.tightFor(width: double.infinity, height: 200) : null,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Image.asset(
+                      'assets/clear_sky.png',
+                      fit: BoxFit.scaleDown,
                     )
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(width: 20),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        WeatherStats().getTemp(),
+                        style: style,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        WeatherStats().getWeather(),
+                        style: const TextStyle(fontSize: 16),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
