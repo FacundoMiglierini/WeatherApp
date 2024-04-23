@@ -1,5 +1,5 @@
 name: weather_app
-description: A new Flutter project.
+description: A weather app
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -12,9 +12,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-  english_words: ^4.0.0
-  provider: ^6.0.0
   cupertino_icons: ^1.0.6
+  path: ^1.9.0
+  email_validator: '^2.1.16'
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  hive_generator: ^1.1.3
+  build_runner: ^2.1.11
+  crypto: ^3.0.3
+  http: ^1.2.1
+  provider: ^6.1.2
+    
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +32,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/weather_logo.png
+    - assets/clear_sky_day.png
+    - assets/clear_sky_night.png
+    - assets/rain_day.png
+    - assets/rain_night.png
+    - assets/thunderstorm_day.png
+    - assets/thunderstorm_night.png
+    - assets/snowfall_day.png
+    - assets/snowfall_night.png
+    

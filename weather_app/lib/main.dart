@@ -1,113 +1,99 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'controllers/auth_controller.dart';
+import 'widgets/login.dart';
+import 'widgets/signup.dart';
+import 'widgets/weather.dart';
+
+
+void main() async {
+  await Hive.initFlutter();
+  await Hive.openBox<String>('user');
+
+  runApp(const WeatherApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-    Widget build(BuildContext context) {
-      return ChangeNotifierProvider(
-        create: (context) => MyAppState(),
-        child: MaterialApp(
-          title: 'Weather App',
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-          ),
-          home: MyHomePage(),
-        ),
-      );
-    }
+  State<HomePage> createState() => _HomePageState();
 }
 
 
-class MyAppState extends ChangeNotifier {
-  var isLoggedIn = false;
-  
-  bool logIn(username, password) {
-    var ok = true;
-    if (ok) {
-      isLoggedIn = true;
-    }
-    notifyListeners();
-    return isLoggedIn;
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class WeatherApp extends StatelessWidget {
+  const WeatherApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => AuthState(),
+      child: MaterialApp(
+        title: 'Weather App',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme:
+              ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+        ),
+        home: const HomePage(),
+      ),
+    );
+  }
+}
 
-    Widget page = LoginPage();
+class _HomePageState extends State<HomePage> {
+
+  var selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    
+    var appState = context.watch<AuthState>();
+    var isLoggedIn = appState.isLoggedIn;
+    
+    Widget page;
+    
+    if (isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+
+        Navigator.pushReplacement<void, void>(
+          context,
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const WeatherPage(),
+          ),
+        );
+      });
+    }
+    
+    switch (selectedIndex) {
+      case 0:
+        page = LoginPage(toggleIndex: toggleIndex);
+      case 1:
+        page = RegisterPage(toggleIndex: toggleIndex);
+      default:
+        throw UnimplementedError('No widget for $selectedIndex');
+    }
 
     return Scaffold(
-      body: page,
-    );
-  }
-}
-
-class LoginPage extends StatelessWidget {
-  @override 
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var isLoggedIn = appState.isLoggedIn;
-
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      resizeToAvoidBottomInset: true,
+      body: Column(
         children: [
-          Text('username'),
-          Text('password'),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  if (appState.logIn("HOLA", "CHAU")) {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const WeatherPage()),
-                      );
-                  }
-                },
-                child: Text('Log in'),
-              ),
-              SizedBox(height: 10),
-            ],
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.background,
+              child: page,
+            ),
           ),
         ],
       ),
     );
   }
-}
   
-class WeatherPage extends StatelessWidget {
-  const WeatherPage({super.key});
-
-  @override 
-  Widget build(BuildContext context) {
-
-    return const Center( 
-      child: Column( 
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('WEATHER!'),
-        ],
-      ),
-    );
+  void toggleIndex() {
+    setState(() {
+      selectedIndex = 1 - selectedIndex;
+    });
   }
 }
