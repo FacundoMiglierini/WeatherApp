@@ -9,7 +9,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:weather_app/weather_controller.dart';
 
-//TODO fix weather layout on big screens
 //TODO change photo according to weather
 //TODO refactor code structure
 //TODO fix closing the app with back button (pass login to false)
@@ -698,7 +697,7 @@ class WeatherCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Image.asset(
-                      'assets/clear_sky.png',
+                      WeatherStats().getWeatherAsset() ?? 'assets/weather_logo.png',
                       fit: BoxFit.scaleDown,
                     )
                   ),

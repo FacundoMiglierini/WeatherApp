@@ -37,5 +37,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/weather_logo.png
-    - assets/clear_sky.png
+    - assets/clear_sky_day.png
+    - assets/clear_sky_night.png
+    - assets/rain_day.png
+    - assets/rain_night.png
+    - assets/thunderstorm_day.png
+    - assets/thunderstorm_night.png
+    - assets/snowfall_day.png
+    - assets/snowfall_night.png
     

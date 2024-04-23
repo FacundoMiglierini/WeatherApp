@@ -12,9 +12,28 @@ class WeatherStats {
 
   final Map<String, List<int>> _weatherCodes = {
     'Clear sky': [0,1,2,3],
-    'Rain': [61,63,65,66,67],
+    'Rain': [61,63,65,66,67,80,81,82],
     'Thunderstorm': [95,96,99],
     'Snow fall': [71,73,75,77],
+  };
+  
+  final Map<String, Map<String, String>> _weatherImages = {
+    'Clear sky': {
+      'day' : 'assets/clear_sky_day.png',
+      'night' : 'assets/clear_sky_night.png',
+    },
+    'Rain': {
+      'day' : 'assets/rain_day.png',
+      'night' : 'assets/rain_night.png',
+    },
+    'Thunderstorm': {
+      'day' : 'assets/thunderstorm_day.png',
+      'night' : 'assets/thunderstorm_night.png',
+    },
+    'Snow fall': {
+      'day' : 'assets/snowfall_day.png',
+      'night' : 'assets/snowfall_night.png',
+    }
   };
 
   //Hardcoded city coordinates and name 
@@ -63,6 +82,17 @@ class WeatherStats {
     }
     
     return 'Unknown weather';
+  }
+  
+  String? getWeatherAsset() {
+    String day = isDay() ? 'day' : 'night';
+    
+    String weather = getWeather();
+    if (_weatherImages.containsKey(weather)) {
+      return _weatherImages[weather]?[day];
+    }
+    
+    return 'assets/weather_logo.png';
   }
   
   double getLat() {
