@@ -13,7 +13,7 @@ class AuthState extends ChangeNotifier {
       }
 
       if (!EmailValidator.validate(email)) {
-        throw const FormatException('Invalid email format');
+        throw Exception('Invalid email format');
       }
       
       if (!DatabaseHelper().isValidUser(email, password)) {

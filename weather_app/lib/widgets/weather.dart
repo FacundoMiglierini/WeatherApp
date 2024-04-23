@@ -219,9 +219,9 @@ class _WeatherPageState extends State<WeatherPage>{
             ],
         )
       ),
-      body: SingleChildScrollView( 
+      body: loaded ? SingleChildScrollView( 
         child: Center(
-          child: loaded ? Padding(
+          child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
               vertical: deviceWidth(context) * 0.08,
@@ -236,16 +236,18 @@ class _WeatherPageState extends State<WeatherPage>{
                     style: Theme.of(context).textTheme.displaySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.normal, 
-                    ) 
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const WeatherCard(),
               ],
             ),
-          ) : const CircularProgressIndicator(),
-        )
+          ),
+        ),
+      ) : const Center( 
+        child: CircularProgressIndicator(),
       )
-      
     );
   }
 
