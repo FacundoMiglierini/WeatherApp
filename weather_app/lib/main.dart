@@ -9,9 +9,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:weather_app/weather_controller.dart';
 
-//TODO refactor code structure
-//TODO fix closing the app with back button (pass login to false)
-
 
 void main() async {
   await Hive.initFlutter();
@@ -65,7 +62,7 @@ class AppState extends ChangeNotifier {
       return "Welcome!";
     } catch (error) {
       notifyListeners();
-      return error.toString();
+      return error.toString().replaceAll("Exception: ", ""); 
     }
   }
   
@@ -93,7 +90,7 @@ class _HomePageState extends State<HomePage> {
       selectedIndex = 1 - selectedIndex;
     });
   }
-
+  
   @override
   Widget build(BuildContext context) {
     
@@ -552,7 +549,7 @@ class _WeatherPageState extends State<WeatherPage>{
                         Expanded( 
                           child: Image.asset('assets/weather_logo.png', fit: BoxFit.cover,),
                         ),
-                        Text('Menu'),
+                        const Text('Menu'),
                       ],
                     ),
                   ),
@@ -564,14 +561,14 @@ class _WeatherPageState extends State<WeatherPage>{
                 onTap: () {
                   showAlertDialog(BuildContext context) {  
                     Widget cancelButton = TextButton(
-                      child: Text("No"),
+                      child: const Text("No"),
                       onPressed:  () {
                         Navigator.pop(context);
                         Navigator.pop(context);
                       },
                     );
                     Widget continueButton = TextButton(
-                      child: Text("Yes"),
+                      child: const Text("Yes"),
                       onPressed:  () {
                         appState.logOut();              
                         Navigator.pushReplacement<void, void>(
@@ -583,8 +580,8 @@ class _WeatherPageState extends State<WeatherPage>{
                       },
                     );  
                     AlertDialog alert = AlertDialog(
-                      title: Text('Log out'),
-                      content: Text('Are you sure to log out?'),
+                      title: const Text('Log out'),
+                      content: const Text('Are you sure to log out?'),
                       actions: [
                         cancelButton,
                         continueButton,
@@ -625,7 +622,7 @@ class _WeatherPageState extends State<WeatherPage>{
               const WeatherCard(),
             ],
           ),
-        ) : CircularProgressIndicator(),
+        ) : const CircularProgressIndicator(),
       )
     );
   }
@@ -681,8 +678,10 @@ class WeatherCard extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorText = WeatherStats().isDay() ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.surface;
-    final style = theme.textTheme.displayMedium!.copyWith(
+    final style = deviceWidth(context) > 400 ? theme.textTheme.displayMedium!.copyWith(
       color: colorText,
+    ) : theme.textTheme.displaySmall!.copyWith(
+      color: colorText
     );
 
     return Column(
@@ -690,11 +689,11 @@ class WeatherCard extends StatelessWidget {
         Card(
           color: WeatherStats().isDay() ? theme.colorScheme.primaryContainer : theme.colorScheme.onSurfaceVariant,
           child: Container(
-            constraints: deviceWidth(context) > 400 ? BoxConstraints.tightFor(width: double.infinity, height: 200) : null,
+            constraints: deviceWidth(context) > 400 ? const BoxConstraints.tightFor(width: double.infinity, height: 200) : null,
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Image.asset(
@@ -702,24 +701,25 @@ class WeatherCard extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                     )
                   ),
-                  const SizedBox(width: 20),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        WeatherStats().getTemp(),
-                        style: style,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        WeatherStats().getWeather(),
-                        style: TextStyle(
-                          fontSize: 16, 
-                          color: colorText,
+                  Expanded( 
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          WeatherStats().getTemp(),
+                          style: style,
                         ),
-                      )
-                    ],
-                  ),
+                        const SizedBox(height: 10),
+                        Text(
+                          WeatherStats().getWeather(),
+                          style: TextStyle(
+                            fontSize: 16, 
+                            color: colorText,
+                          ),
+                        )
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
