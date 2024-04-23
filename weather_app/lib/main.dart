@@ -9,7 +9,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:weather_app/weather_controller.dart';
 
-//TODO change photo according to weather
 //TODO refactor code structure
 //TODO fix closing the app with back button (pass login to false)
 //TODO optional: add loading animations
@@ -495,6 +494,7 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage>{
   Timer? _timer;
+  var loaded = false;
 
   @override
   void initState() {
@@ -519,6 +519,7 @@ class _WeatherPageState extends State<WeatherPage>{
       if (response.statusCode == 200) {
         setState(() {
           WeatherStats().loadFromJson(jsonDecode(response.body) as Map<String, dynamic>);
+          loaded = true;
         });
       }
     }
@@ -604,7 +605,7 @@ class _WeatherPageState extends State<WeatherPage>{
         )
       ),
       body: Center(
-        child: Padding(
+        child: loaded ? Padding(
           padding: EdgeInsets.symmetric(
             horizontal: deviceWidth(context) > 1126 ? deviceWidth(context) * 0.30 : deviceWidth(context) * 0.08,
             vertical: deviceWidth(context) * 0.08,
@@ -625,8 +626,8 @@ class _WeatherPageState extends State<WeatherPage>{
               const WeatherCard(),
             ],
           ),
-        ),
-      ),
+        ) : CircularProgressIndicator(),
+      )
     );
   }
 }
