@@ -39,7 +39,7 @@ class WeatherStats {
   //Hardcoded city coordinates and name 
   final double _lat = -34.9206722;
   final double _long = -57.9561499;
-  final String _city = 'La Plata';
+  final String _city = 'La Plata, Argentina';
 
   static final WeatherStats _singleton = WeatherStats._();
 

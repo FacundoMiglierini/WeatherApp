@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:weather_app/controllers/weather_controller.dart';
 
 import '../controllers/auth_controller.dart';
-import 'main.dart';
+import '../main.dart';
 
 class WeatherCard extends StatelessWidget {
   const WeatherCard({
